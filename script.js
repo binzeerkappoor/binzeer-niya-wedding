@@ -238,10 +238,105 @@ function makeSparkle(x, y) {
 }
 
 
+/* =========================================================
+   Premium tiny golden hearts on touch / mouse hold
+   ========================================================= */
+
+var heartTimer = null;
+var heartActive = false;
+var lastTouchX = 0;
+var lastTouchY = 0;
+
+function createGoldenHeart(x, y) {
+  if (!sparkleLayer || reduceMotion) return;
+
+  var heart = document.createElement("span");
+  heart.className = "touch-heart";
+
+  /* Very small random movement */
+  var driftX = (Math.random() * 34 - 17).toFixed(0) + "px";
+  var driftY = (-18 - Math.random() * 28).toFixed(0) + "px";
+  var rotate = (Math.random() * 30 - 15).toFixed(0) + "deg";
+
+  heart.style.left =
+    (x + Math.random() * 18 - 9).toFixed(0) + "px";
+
+  heart.style.top =
+    (y + Math.random() * 14 - 7).toFixed(0) + "px";
+
+  heart.style.setProperty("--heart-x", driftX);
+  heart.style.setProperty("--heart-y", driftY);
+  heart.style.setProperty("--heart-rotate", rotate);
+
+  sparkleLayer.appendChild(heart);
+
+  window.setTimeout(function () {
+    if (heart.parentNode) {
+      heart.parentNode.removeChild(heart);
+    }
+  }, 1100);
+}
+
+function startHeartEffect(x, y) {
+  if (reduceMotion || heartActive) return;
+
+  heartActive = true;
+  lastTouchX = x;
+  lastTouchY = y;
+
+  createGoldenHeart(lastTouchX, lastTouchY);
+
+  heartTimer = window.setInterval(function () {
+    if (!heartActive) return;
+
+    createGoldenHeart(lastTouchX, lastTouchY);
+  }, 90);
+}
+
+function updateHeartPosition(x, y) {
+  lastTouchX = x;
+  lastTouchY = y;
+}
+
+function stopHeartEffect() {
+  heartActive = false;
+
+  if (heartTimer) {
+    window.clearInterval(heartTimer);
+    heartTimer = null;
+  }
+}
+
 document.addEventListener(
   "pointerdown",
   function (e) {
-    makeSparkle(e.clientX, e.clientY);
+    startHeartEffect(e.clientX, e.clientY);
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "pointermove",
+  function (e) {
+    if (heartActive) {
+      updateHeartPosition(e.clientX, e.clientY);
+    }
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "pointerup",
+  function () {
+    stopHeartEffect();
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "pointercancel",
+  function () {
+    stopHeartEffect();
   },
   { passive: true }
 );
