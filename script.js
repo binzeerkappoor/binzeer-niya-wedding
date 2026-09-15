@@ -245,6 +245,14 @@ function makeSparkle(x, y) {
 var heartTimer = null;
 var heartActive = false;
 var lastTouchX = 0;
+var lastTouchY = 0/* =========================================================
+   Premium tiny golden hearts on touch / mouse hold
+   Mobile + Desktop
+   ========================================================= */
+
+var heartTimer = null;
+var heartActive = false;
+var lastTouchX = 0;
 var lastTouchY = 0;
 
 function createGoldenHeart(x, y) {
@@ -253,7 +261,6 @@ function createGoldenHeart(x, y) {
   var heart = document.createElement("span");
   heart.className = "touch-heart";
 
-  /* Very small random movement */
   var driftX = (Math.random() * 34 - 17).toFixed(0) + "px";
   var driftY = (-18 - Math.random() * 28).toFixed(0) + "px";
   var rotate = (Math.random() * 30 - 15).toFixed(0) + "deg";
@@ -274,13 +281,14 @@ function createGoldenHeart(x, y) {
     if (heart.parentNode) {
       heart.parentNode.removeChild(heart);
     }
-  }, 1100);
+  }, 1200);
 }
 
 function startHeartEffect(x, y) {
   if (reduceMotion || heartActive) return;
 
   heartActive = true;
+
   lastTouchX = x;
   lastTouchY = y;
 
@@ -290,7 +298,7 @@ function startHeartEffect(x, y) {
     if (!heartActive) return;
 
     createGoldenHeart(lastTouchX, lastTouchY);
-  }, 90);
+  }, 100);
 }
 
 function updateHeartPosition(x, y) {
@@ -301,11 +309,16 @@ function updateHeartPosition(x, y) {
 function stopHeartEffect() {
   heartActive = false;
 
-  if (heartTimer) {
+  if (heartTimer !== null) {
     window.clearInterval(heartTimer);
     heartTimer = null;
   }
 }
+
+
+/* =========================================================
+   Pointer events — Desktop + Modern Mobile
+   ========================================================= */
 
 document.addEventListener(
   "pointerdown",
@@ -318,9 +331,9 @@ document.addEventListener(
 document.addEventListener(
   "pointermove",
   function (e) {
-    if (heartActive) {
-      updateHeartPosition(e.clientX, e.clientY);
-    }
+    if (!heartActive) return;
+
+    updateHeartPosition(e.clientX, e.clientY);
   },
   { passive: true }
 );
@@ -335,6 +348,54 @@ document.addEventListener(
 
 document.addEventListener(
   "pointercancel",
+  function () {
+    stopHeartEffect();
+  },
+  { passive: true }
+);
+
+
+/* =========================================================
+   Extra Touch events — Mobile safety
+   ========================================================= */
+
+document.addEventListener(
+  "touchstart",
+  function (e) {
+    if (!e.touches || !e.touches.length) return;
+
+    startHeartEffect(
+      e.touches[0].clientX,
+      e.touches[0].clientY
+    );
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchmove",
+  function (e) {
+    if (!heartActive) return;
+    if (!e.touches || !e.touches.length) return;
+
+    updateHeartPosition(
+      e.touches[0].clientX,
+      e.touches[0].clientY
+    );
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchend",
+  function () {
+    stopHeartEffect();
+  },
+  { passive: true }
+);
+
+document.addEventListener(
+  "touchcancel",
   function () {
     stopHeartEffect();
   },
