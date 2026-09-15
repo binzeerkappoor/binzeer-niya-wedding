@@ -1397,3 +1397,10 @@ button{ font-family: inherit; }
   .envelope__title{ font-size:.72rem; margin-bottom:8px; }
   .envelope__front{ padding-bottom:15px; }
 }
+.touch-glitter {
+   ...
+}
+
+@keyframes touchGlitterFall {
+   ...
+}
