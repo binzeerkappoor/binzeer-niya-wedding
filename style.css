@@ -1404,3 +1404,96 @@ button{ font-family: inherit; }
 @keyframes touchGlitterFall {
    ...
 }
+/* =========================================================
+   Premium tiny golden heart touch effect
+   ========================================================= */
+
+.touch-heart {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+  z-index: 99999;
+
+  background: linear-gradient(
+    135deg,
+    #fff3c4 0%,
+    #e8c46b 45%,
+    #b98535 100%
+  );
+
+  transform: rotate(45deg) scale(0.45);
+  opacity: 0;
+
+  box-shadow:
+    0 0 4px rgba(255, 225, 150, 0.8),
+    0 0 9px rgba(218, 175, 82, 0.35);
+
+  animation: premiumHeartFloat 1.05s ease-out forwards;
+}
+
+/* Two tiny rounded lobes to create a real heart shape */
+
+.touch-heart::before,
+.touch-heart::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+
+  background: inherit;
+}
+
+.touch-heart::before {
+  top: -3px;
+  left: 0;
+}
+
+.touch-heart::after {
+  top: 0;
+  left: -3px;
+}
+
+@keyframes premiumHeartFloat {
+
+  0% {
+    opacity: 0;
+    transform:
+      translate3d(0, 4px, 0)
+      rotate(45deg)
+      scale(0.35);
+  }
+
+  15% {
+    opacity: 0.95;
+    transform:
+      translate3d(0, 0, 0)
+      rotate(45deg)
+      scale(0.75);
+  }
+
+  55% {
+    opacity: 0.75;
+    transform:
+      translate3d(
+        calc(var(--heart-x) * 0.55),
+        calc(var(--heart-y) * 0.55),
+        0
+      )
+      rotate(calc(45deg + var(--heart-rotate)))
+      scale(0.62);
+  }
+
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(
+        var(--heart-x),
+        var(--heart-y),
+        0
+      )
+      rotate(calc(45deg + var(--heart-rotate)))
+      scale(0.2);
+  }
+}
