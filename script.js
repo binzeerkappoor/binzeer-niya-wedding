@@ -171,33 +171,80 @@
   }
 
   /* =========================================================
-     Touch / click gold sparkle effect
-     ========================================================= */
-  var sparkleLayer = document.getElementById("sparkleLayer");
+   Touch / click gold sparkle + falling glitter effect
+   ========================================================= */
 
-  function makeSparkle(x, y) {
-    if (!sparkleLayer || reduceMotion) return;
-    var s = document.createElement("span");
-    s.className = "sparkle";
-    s.style.left = x + "px";
-    s.style.top = y + "px";
-    sparkleLayer.appendChild(s);
-    s.addEventListener("animationend", function () {
-      if (s.parentNode) s.parentNode.removeChild(s);
-    });
-    window.setTimeout(function () {
-      if (s.parentNode) s.parentNode.removeChild(s);
-    }, 900);
+var sparkleLayer = document.getElementById("sparkleLayer");
+
+function makeSparkle(x, y) {
+  if (!sparkleLayer || reduceMotion) return;
+
+  /* Existing sparkle effect */
+  var s = document.createElement("span");
+  s.className = "sparkle";
+  s.style.left = x + "px";
+  s.style.top = y + "px";
+  sparkleLayer.appendChild(s);
+
+  s.addEventListener("animationend", function () {
+    if (s.parentNode) s.parentNode.removeChild(s);
+  });
+
+  window.setTimeout(function () {
+    if (s.parentNode) s.parentNode.removeChild(s);
+  }, 900);
+
+
+  /* New golden glitter falling downward */
+
+  var glitterCount = 12;
+
+  for (var i = 0; i < glitterCount; i++) {
+
+    var glitter = document.createElement("span");
+    glitter.className = "touch-glitter";
+
+    glitter.style.left = x + (Math.random() * 70 - 35) + "px";
+    glitter.style.top = y + (Math.random() * 20 - 10) + "px";
+
+    glitter.style.setProperty(
+      "--gx",
+      (Math.random() * 100 - 50).toFixed(0) + "px"
+    );
+
+    glitter.style.setProperty(
+      "--gy",
+      (45 + Math.random() * 90).toFixed(0) + "px"
+    );
+
+    glitter.style.setProperty(
+      "--gdelay",
+      (Math.random() * 0.18).toFixed(2) + "s"
+    );
+
+    glitter.style.setProperty(
+      "--gsize",
+      (2 + Math.random() * 3).toFixed(1) + "px"
+    );
+
+    sparkleLayer.appendChild(glitter);
+
+    window.setTimeout(function (el) {
+      return function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      };
+    }(glitter), 1300);
   }
+}
 
-  document.addEventListener(
-    "pointerdown",
-    function (e) {
-      // don't fight with normal button/link interaction, just layer a sparkle
-      makeSparkle(e.clientX, e.clientY);
-    },
-    { passive: true }
-  );
+
+document.addEventListener(
+  "pointerdown",
+  function (e) {
+    makeSparkle(e.clientX, e.clientY);
+  },
+  { passive: true }
+);
 
   /* =========================================================
      Scroll reveal animations
