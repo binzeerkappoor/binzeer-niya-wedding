@@ -330,71 +330,137 @@
     googleCalBtn.href = url;
   }
 
-  /* =========================================================
-     Wishes & duas (localStorage only — see on-page note)
-     ========================================================= */
-  var WISH_KEY = "bn_wedding_wishes_2027";
-  var wishForm = document.getElementById("wishForm");
-  var wishList = document.getElementById("wishList");
+/* =========================================================
+   Wishes & Duas — Firebase Firestore
+   ========================================================= */
 
-  function loadWishes() {
-    try {
-      var raw = window.localStorage.getItem(WISH_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
+var wishForm = document.getElementById("wishForm");
+var wishList = document.getElementById("wishList");
+
+function renderWishes(wishes) {
+
+  if (!wishList) return;
+
+  wishList.innerHTML = "";
+
+  wishes.forEach(function (w) {
+
+    var card = document.createElement("div");
+    card.className = "wish-card";
+
+    var name = document.createElement("p");
+    name.className = "wish-card__name";
+    name.textContent = w.name || "";
+
+    var text = document.createElement("p");
+    text.className = "wish-card__text";
+    text.textContent = w.text || "";
+
+    card.appendChild(name);
+    card.appendChild(text);
+
+    wishList.appendChild(card);
+
+  });
+}
+
+
+/* Load wishes from Firebase */
+
+function loadWishes() {
+
+  if (!wishList) return;
+
+  db.collection("wishes")
+    .orderBy("ts", "desc")
+    .onSnapshot(
+      function (snapshot) {
+
+        var wishes = [];
+
+        snapshot.forEach(function (doc) {
+          wishes.push(doc.data());
+        });
+
+        renderWishes(wishes);
+
+      },
+      function (error) {
+
+        console.error("Error loading wishes:", error);
+
+        wishList.innerHTML =
+          '<p class="wishes__error">Unable to load wishes right now.</p>';
+
+      }
+    );
+}
+
+
+/* Submit new wish */
+
+if (wishForm) {
+
+  wishForm.addEventListener("submit", function (e) {
+
+    e.preventDefault();
+
+    var nameInput = document.getElementById("wishName");
+    var textInput = document.getElementById("wishText");
+
+    var name = (nameInput.value || "").trim();
+    var text = (textInput.value || "").trim();
+
+    if (!name || !text) return;
+
+
+    /* Disable button while sending */
+
+    var submitBtn = wishForm.querySelector("button[type='submit']");
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Sending...";
     }
-  }
 
-  function saveWishes(list) {
-    try {
-      window.localStorage.setItem(WISH_KEY, JSON.stringify(list));
-    } catch (e) {
-      /* storage unavailable (private browsing etc.) — form still works this session */
-    }
-  }
 
-  function renderWishes() {
-    if (!wishList) return;
-    var wishes = loadWishes();
-    wishList.innerHTML = "";
-    wishes
-      .slice()
-      .reverse()
-      .forEach(function (w) {
-        var card = document.createElement("div");
-        card.className = "wish-card";
-        var name = document.createElement("p");
-        name.className = "wish-card__name";
-        name.textContent = w.name;
-        var text = document.createElement("p");
-        text.className = "wish-card__text";
-        text.textContent = w.text;
-        card.appendChild(name);
-        card.appendChild(text);
-        wishList.appendChild(card);
+    /* Save to Firebase */
+
+    db.collection("wishes")
+      .add({
+        name: name,
+        text: text,
+        ts: Date.now()
+      })
+      .then(function () {
+
+        wishForm.reset();
+
+      })
+      .catch(function (error) {
+
+        console.error("Error saving wish:", error);
+
+        alert("Sorry, your wish could not be sent. Please try again.");
+
+      })
+      .finally(function () {
+
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Send Wish";
+        }
+
       });
-  }
 
-  if (wishForm) {
-    wishForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var nameInput = document.getElementById("wishName");
-      var textInput = document.getElementById("wishText");
-      var name = (nameInput.value || "").trim();
-      var text = (textInput.value || "").trim();
-      if (!name || !text) return;
+  });
 
-      var wishes = loadWishes();
-      wishes.push({ name: name, text: text, ts: Date.now() });
-      saveWishes(wishes);
-      renderWishes();
+}
 
-      wishForm.reset();
-    });
-  }
 
-  renderWishes();
+/* Start loading wishes */
+
+loadWishes();
 
   /* =========================================================
      Small phones: if the opening card overflows viewport height,
