@@ -238,7 +238,23 @@
   </footer>
 
 </div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBPu7YUoT_yY5eTplSvqn7Jtf73_qdYRU4",
+    authDomain: "binzeer-niya-wedding.firebaseapp.com",
+    projectId: "binzeer-niya-wedding",
+    storageBucket: "binzeer-niya-wedding.firebasestorage.app",
+    messagingSenderId: "84507549234",
+    appId: "1:84507549234:web:140bc7fe2cc8b731b3662b"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+</script>
+  
 <script src="script.js"></script>
 </body>
 </html>
